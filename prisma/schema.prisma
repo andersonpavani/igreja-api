@@ -1,0 +1,170 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                       Int                 @id @default(autoincrement())
+  email                    String              @unique
+  name                     String
+  password                 String
+  type                     UserType            @default(Usuario)
+  enable                   Boolean             @default(true)
+  createdAt                DateTime            @default(now())
+  updatedAt                DateTime            @updatedAt
+  financialMovementsCreate FinancialMovement[] @relation("FinancialMovementCreateUser")
+  financialMovementsCancel FinancialMovement[] @relation("FinancialMovementCancelUser")
+}
+
+enum UserType {
+  Administrador
+  Usuario
+}
+
+model Account {
+  id                       Int                 @id @default(autoincrement())
+  name                     String              @unique
+  type                     AccountType
+  openingBalance           Decimal             @db.Decimal(12, 2)
+  enable                   Boolean             @default(true)
+  createdAt                DateTime            @default(now())
+  updatedAt                DateTime            @updatedAt
+  financialMovementInputs  FinancialMovement[] @relation("FinancialMovementAccountInput")
+  financialMovementOutputs FinancialMovement[] @relation("FinancialMovementAccountOutput")
+}
+
+enum AccountType {
+  Caixa
+  Banco
+}
+
+model Category {
+  id                 Int                 @id @default(autoincrement())
+  name               String              @unique
+  type               CategoryType
+  parentId           Int?
+  parent             Category?           @relation("CategoryParentFK", fields: [parentId], references: [id])
+  Categories         Category[]          @relation("CategoryParentFK")
+  financialMovements FinancialMovement[]
+}
+
+enum CategoryType {
+  Entrada
+  Saida
+  DizimoOferta
+}
+
+model State {
+  id      Int    @id
+  name    String @unique
+  acronym String
+  region  String
+  cities  City[]
+}
+
+model City {
+  id            Int      @id
+  name          String   @unique
+  stateId       Int
+  state         State    @relation(fields: [stateId], references: [id])
+  peapleAddress Person[]
+}
+
+model Church {
+  id         Int     @id @default(autoincrement())
+  cnpj       String?
+  nickname   String
+  name       String
+  address    String?
+  foneNumber String?
+}
+
+model Person {
+  id                     Int                 @id @default(autoincrement())
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  relationship           PersonRelationship
+  name                   String
+  nickname               String?
+  email                  String?
+  gender                 PersonGender
+  birthDate              DateTime?           @db.Date
+  rg                     String?
+  cpf                    String?
+  phoneNumber1Type       PhoneNumberType?
+  phoneNumber1           String?
+  phoneNumber1IsWhatsapp Boolean?
+  phoneNumber2Type       PhoneNumberType?
+  phoneNumber2           String?
+  phoneNumber2IsWhatsapp Boolean?
+  addressStreet          String?
+  addressNumber          String?
+  addressNeighborhood    String?
+  addressComplement      String?
+  addressCityId          Int?
+  addressCity            City?               @relation(fields: [addressCityId], references: [id])
+  addressZipCode         String?
+  additionalInformation  String?
+  financialMovements     FinancialMovement[]
+}
+
+enum PersonRelationship {
+  Membro
+  Visitante
+  Coligado
+  Inativo
+}
+
+enum PhoneNumberType {
+  Celular
+  Residencial
+  Comercial
+  Contado
+}
+
+enum PersonGender {
+  Masculino
+  Feminino
+}
+
+model FinancialMovement {
+  id              Int                   @id @default(autoincrement())
+  type            FinancialMovementType
+  date            DateTime              @db.Date
+  description     String?
+  personId        Int?
+  person          Person?               @relation(fields: [personId], references: [id])
+  categoryId      Int?
+  category        Category?             @relation(fields: [categoryId], references: [id])
+  accountInputId  Int?
+  accountInput    Account?              @relation("FinancialMovementAccountInput", fields: [accountInputId], references: [id])
+  accountOutputId Int?
+  accountOutput   Account?              @relation("FinancialMovementAccountOutput", fields: [accountOutputId], references: [id])
+  value           Decimal               @db.Decimal(12, 2)
+  canceled        Boolean               @default(false)
+  userCreateId    Int
+  userCreate      User                  @relation("FinancialMovementCreateUser", fields: [userCreateId], references: [id])
+  createdAt       DateTime              @default(now())
+  userCancelId    Int?
+  userCancel      User?                 @relation("FinancialMovementCancelUser", fields: [userCancelId], references: [id])
+  canceledAt      DateTime?
+}
+
+enum FinancialMovementType {
+  DizimoOferta
+  Entrada
+  Saida
+  Transferencia
+}
+
+model Params {
+  param String @id
+  value String
+}
