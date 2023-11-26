@@ -9,4 +9,8 @@ export default interface User {
     enable?: boolean;
     createdAt?: Date;
     updatedAt?: Date;
+    _count?: {
+        accountsCreated?: number;
+        accountsUpdated?: number;
+    }
 };

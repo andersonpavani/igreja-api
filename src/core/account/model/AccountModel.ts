@@ -7,7 +7,7 @@ export default interface Account {
     name: string;
     type: AccountType;
     openingBalance: Decimal;
+    openingDate: Date;
+    closingDate?: Date | null;
     enable?: boolean;
-    createdAt?: Date;
-    updatedAt?: Date;
 };

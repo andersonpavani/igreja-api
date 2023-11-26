@@ -25,14 +25,39 @@ export default class AccountRepositoryPrisma implements AccountRepository {
         return this.prisma.account.findMany();
     }
 
-    create(account: Account): Promise<Account> {
-        return this.prisma.account.create({ data: account });
+    create(account: Account, userId: number): Promise<Account> {
+        return this.prisma.account.create({
+            data: {
+                ...account as Omit<Account, 'id'>,
+                createdBy: {
+                    connect: { id: userId },
+                },
+                updatedBy: {
+                    connect: { id: userId }
+                }
+            }
+        });
     }
 
-    update(account: Partial<Account>): Promise<Account> {
+    update(account: Partial<Account>, userId: number): Promise<Account> {
         return this.prisma.account.update({
             where: { id: account.id },
-            data: account
+            data: {
+                ...account as Omit<Account, 'id'>,
+                updatedBy: {
+                    connect: {
+                        id: userId
+                    }
+                }
+            }
         });
+    }
+
+    delete(id: number): Promise<Account> {
+        return this.prisma.account.delete({
+            where: {
+                id: id
+            }
+        })
     }
 }

@@ -1,28 +1,40 @@
 import UseCase from "../../shared/UseCase";
 import UserRepository from "./UserRepository";
-import { NotFoundError } from "../../shared/ErrorHelpers";
+import { ForbiddenError, NotFoundError } from "../../shared/ErrorHelpers";
 import User, { UserType } from "../model/UserModel";
 
 type Input = {
-    id: number;
+    id?: number;
     email?: string;
     name?: string;
     type?: UserType;
     enable?: boolean;
+    payloadUserId: number,
+    payloadUserType: UserType
 }
 
-export default class UserChangePassword implements UseCase<Input, User> {
+export default class UserUpdate implements UseCase<Input, Partial<User>> {
     constructor(private readonly repository: UserRepository) { }
 
-    async execute(data: Input): Promise<User> {
-        const { id } = data;
+    async execute(data: Input): Promise<Partial<User>> {
+        const { id, email, name, type, enable, payloadUserId, payloadUserType } = data;
 
-        const user = await this.repository.findById(id);
+        if (id && payloadUserType != 'Administrador') {
+            throw new ForbiddenError('Apenas administradores podem alterar cadastro de outros usuários');
+        }
 
-        if (!user) {
+        if (id === undefined && (type !== undefined || enable !== undefined)) {
+            throw new ForbiddenError('Apenas seu Email e Nome podem ser alterados');
+        }
+
+        const userExists = await this.repository.findById(id ?? payloadUserId);
+
+        if (!userExists) {
             throw new NotFoundError('Usuário não encontrado');
         }
 
-        return this.repository.update(data);
+        const { password, ...user } = await this.repository.update(id === undefined ? { id: payloadUserId, email, name } : { id, email, name, type, enable });
+
+        return user;
     }
 }

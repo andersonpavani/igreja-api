@@ -19,8 +19,14 @@ model User {
   enable                   Boolean             @default(true)
   createdAt                DateTime            @default(now())
   updatedAt                DateTime            @updatedAt
-  financialMovementsCreate FinancialMovement[] @relation("FinancialMovementCreateUser")
-  financialMovementsCancel FinancialMovement[] @relation("FinancialMovementCancelUser")
+  financialMovementsCreate FinancialMovement[] @relation("FinancialMovementUserCreatedBy")
+  financialMovementsCancel FinancialMovement[] @relation("FinancialMovementUserCanceledBy")
+  peopleCreated            Person[]            @relation("PersonUserCreatedBy")
+  peopleUpdated            Person[]            @relation("PersonUserUpdatedBy")
+  categoriesCreated        Category[]          @relation("CategoryUserCreatedBy")
+  categoriesUpdated        Category[]          @relation("CategoryUserUpdatedBy")
+  accountsCreated          Account[]           @relation("AccountUserCreatedBy")
+  accountsUpdated          Account[]           @relation("AccountUserUpdatedBy")
 }
 
 enum UserType {
@@ -33,9 +39,15 @@ model Account {
   name                     String              @unique
   type                     AccountType
   openingBalance           Decimal             @db.Decimal(12, 2)
+  openingDate              DateTime            @db.Date
+  closingDate              DateTime?           @db.Date
   enable                   Boolean             @default(true)
   createdAt                DateTime            @default(now())
   updatedAt                DateTime            @updatedAt
+  createdById              Int
+  createdBy                User                @relation("AccountUserCreatedBy", fields: [createdById], references: [id])
+  updatedById              Int
+  updatedBy                User                @relation("AccountUserUpdatedBy", fields: [updatedById], references: [id])
   financialMovementInputs  FinancialMovement[] @relation("FinancialMovementAccountInput")
   financialMovementOutputs FinancialMovement[] @relation("FinancialMovementAccountOutput")
 }
@@ -51,7 +63,14 @@ model Category {
   type               CategoryType
   parentId           Int?
   parent             Category?           @relation("CategoryParentFK", fields: [parentId], references: [id])
-  Categories         Category[]          @relation("CategoryParentFK")
+  enable             Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  createdById        Int
+  createdBy          User                @relation("CategoryUserCreatedBy", fields: [createdById], references: [id])
+  updatedById        Int
+  updatedBy          User                @relation("CategoryUserUpdatedBy", fields: [updatedById], references: [id])
+  categories         Category[]          @relation("CategoryParentFK")
   financialMovements FinancialMovement[]
 }
 
@@ -78,18 +97,24 @@ model City {
 }
 
 model Church {
-  id         Int     @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   cnpj       String?
   nickname   String
   name       String
   address    String?
   foneNumber String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model Person {
   id                     Int                 @id @default(autoincrement())
   createdAt              DateTime            @default(now())
   updatedAt              DateTime            @updatedAt
+  createdById            Int
+  createdBy              User                @relation("PersonUserCreatedBy", fields: [createdById], references: [id])
+  updatedById            Int
+  updatedBy              User                @relation("PersonUserUpdatedBy", fields: [updatedById], references: [id])
   relationship           PersonRelationship
   name                   String
   nickname               String?
@@ -149,11 +174,11 @@ model FinancialMovement {
   accountOutput   Account?              @relation("FinancialMovementAccountOutput", fields: [accountOutputId], references: [id])
   value           Decimal               @db.Decimal(12, 2)
   canceled        Boolean               @default(false)
-  userCreateId    Int
-  userCreate      User                  @relation("FinancialMovementCreateUser", fields: [userCreateId], references: [id])
+  createdById     Int
+  createdBy       User                  @relation("FinancialMovementUserCreatedBy", fields: [createdById], references: [id])
   createdAt       DateTime              @default(now())
-  userCancelId    Int?
-  userCancel      User?                 @relation("FinancialMovementCancelUser", fields: [userCancelId], references: [id])
+  canceledById    Int?
+  canceledBy      User?                 @relation("FinancialMovementUserCanceledBy", fields: [canceledById], references: [id])
   canceledAt      DateTime?
 }
 

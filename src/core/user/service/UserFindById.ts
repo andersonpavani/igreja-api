@@ -13,8 +13,8 @@ export default class UserFindById implements UseCase<number, Partial<User> | nul
       throw new NotFoundError('Usuário não encontrado');
     }
 
-    const { password, ...rest } = user;
+    const { password, ...userWithoutPassword } = user;
 
-    return rest;
+    return userWithoutPassword;
   }
 }

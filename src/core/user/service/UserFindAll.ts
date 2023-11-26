@@ -7,6 +7,9 @@ export default class UserFindAll implements UseCase<void, User[]> {
 
     async execute(): Promise<User[]> {
         const users = await this.repository.findAll();
-        return users;
+        return users.filter(user => {
+            const { password, ...userWithoutPassword } = user;
+            return userWithoutPassword;
+        });
     }
 }

@@ -25,6 +25,25 @@ export default class UserRepositoryPrisma implements UserRepository {
         return this.prisma.user.findMany();
     }
 
+    findByPartialNameEmail(arg: string): Promise<User[]> {
+        return this.prisma.user.findMany({
+            where: {
+                OR: [
+                    {
+                        name: {
+                            contains: arg
+                        }
+                    },
+                    {
+                        email: {
+                            contains: arg
+                        }
+                    }
+                ]
+            }
+        });
+    }
+
     create(user: User): Promise<User> {
         return this.prisma.user.create({ data: user });
     }
@@ -33,6 +52,28 @@ export default class UserRepositoryPrisma implements UserRepository {
         return this.prisma.user.update({
             where: { id: user.id },
             data: user
+        });
+    }
+
+    delete(id: number): Promise<User> {
+        return this.prisma.user.delete({
+            where: { id: id }
+        });
+    }
+
+    countDependents(id: number): Promise<User | null> {
+        return this.prisma.user.findUnique({
+            where: {
+                id: id
+            },
+            include: {
+                _count: {
+                    select: {
+                        accountsCreated: true,
+                        accountsUpdated: true
+                    }
+                }
+            }
         });
     }
 }

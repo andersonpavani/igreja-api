@@ -31,6 +31,12 @@ export class NotFoundError extends AppError {
     }
 }
 
+export class MethodNotAllowedError extends AppError {
+    constructor(message: string) {
+        super(message, 405);
+    }
+}
+
 export class InternalServerError extends AppError {
     constructor(message: string) {
         super(message, 500);

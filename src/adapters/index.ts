@@ -24,6 +24,10 @@ import AccountFindById from '../core/account/service/AccountFindById';
 import AccountFindByIdController from './account/AccountFindByIdController';
 import UserUpdate from '../core/user/service/UserUpdate';
 import UserUpdateController from './user/UserUpdateController';
+import UserDelete from '../core/user/service/UserDelete';
+import UserDeleteController from './user/UserDeleteController';
+import UserFindByPartialNameEmail from '../core/user/service/UserFindByPartialNameEmail';
+import UserFindByPartialNameEmailController from './user/UserFindByPartialNameEmailController';
 
 export default class Adapters {
     //TODO - Create abstraction of server api
@@ -38,11 +42,13 @@ export default class Adapters {
         //Middleware de autenticação de usuário logado
         new AuthenticateMiddlewareController(server, token);
 
+
         const userChangePassword = new UserChangePassword(userRepository, this.crypt);
         new UserChangePasswordController(this.server, userChangePassword);
 
         const userUpdate = new UserUpdate(userRepository);
         new UserUpdateController(this.server, userUpdate);
+
 
         const accountRepository = new AccountRepositoryPrisma();
 
@@ -65,8 +71,14 @@ export default class Adapters {
         const userFindAll = new UserFindAll(userRepository);
         new UserFindAllController(this.server, userFindAll);
 
+        const userFindByPartialNameEmail = new UserFindByPartialNameEmail(userRepository);
+        new UserFindByPartialNameEmailController(this.server, userFindByPartialNameEmail);
+
         const userfindById = new UserFindById(userRepository);
         new UserFindByIdController(this.server, userfindById);
+
+        const userDelete = new UserDelete(userRepository);
+        new UserDeleteController(this.server, userDelete);
 
 
         //Middleware de manipulação de erros do app !!!DEVE FICAR POR ÚLTIMO!!!
