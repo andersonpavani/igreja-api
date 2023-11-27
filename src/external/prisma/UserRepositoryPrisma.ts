@@ -15,6 +15,12 @@ export default class UserRepositoryPrisma implements UserRepository {
         })
     }
 
+    findByName(name: string): Promise<User | null> {
+        return this.prisma.user.findUnique({
+            where: { name }
+        })
+    }
+
     findByEmail(email: string): Promise<User | null> {
         return this.prisma.user.findUnique({
             where: { email }
@@ -70,7 +76,11 @@ export default class UserRepositoryPrisma implements UserRepository {
                 _count: {
                     select: {
                         accountsCreated: true,
-                        accountsUpdated: true
+                        accountsUpdated: true,
+                        categoriesCreated: true,
+                        categoriesUpdated: true,
+                        peopleCreated: true,
+                        peopleUpdated: true
                     }
                 }
             }

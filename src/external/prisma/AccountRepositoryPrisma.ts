@@ -21,8 +21,12 @@ export default class AccountRepositoryPrisma implements AccountRepository {
         })
     }
 
-    findAll(): Promise<Account[]> {
-        return this.prisma.account.findMany();
+    findAll(onlyEnable: boolean): Promise<Account[]> {
+        if (onlyEnable) {
+            return this.prisma.account.findMany({ where: { enable: true } });
+        } else {
+            return this.prisma.account.findMany();
+        }
     }
 
     create(account: Account, userId: number): Promise<Account> {
@@ -39,11 +43,15 @@ export default class AccountRepositoryPrisma implements AccountRepository {
         });
     }
 
-    update(account: Partial<Account>, userId: number): Promise<Account> {
+    async update(account: Partial<Account>, userId: number): Promise<Account> {
+        await this.prisma.account.update({
+            where: { id: account.id },
+            data: account
+        });
+
         return this.prisma.account.update({
             where: { id: account.id },
             data: {
-                ...account as Omit<Account, 'id'>,
                 updatedBy: {
                     connect: {
                         id: userId
@@ -59,5 +67,21 @@ export default class AccountRepositoryPrisma implements AccountRepository {
                 id: id
             }
         })
+    }
+
+    countDependents(id: number): Promise<Account | null> {
+        return this.prisma.account.findUnique({
+            where: {
+                id: id
+            },
+            include: {
+                _count: {
+                    select: {
+                        financialMovementInputs: true,
+                        financialMovementOutputs: true
+                    }
+                }
+            }
+        });
     }
 }

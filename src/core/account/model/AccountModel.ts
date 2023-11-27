@@ -10,4 +10,8 @@ export default interface Account {
     openingDate: Date;
     closingDate?: Date | null;
     enable?: boolean;
+    _count?: {
+        financialMovementInputs: number;
+        financialMovementOutputs: number;
+    }
 };

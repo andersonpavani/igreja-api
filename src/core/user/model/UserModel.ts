@@ -10,7 +10,11 @@ export default interface User {
     createdAt?: Date;
     updatedAt?: Date;
     _count?: {
-        accountsCreated?: number;
-        accountsUpdated?: number;
+        accountsCreated: number;
+        accountsUpdated: number;
+        categoriesCreated: number;
+        categoriesUpdated: number;
+        peopleCreated: number;
+        peopleUpdated: number;
     }
 };

@@ -19,6 +19,14 @@ export default class UserDelete implements UseCase<number, Partial<User>> {
             throw new MethodNotAllowedError('Existem contas cadastradas vinculadas a esse usuário');
         }
 
+        if ((count?.categoriesCreated ?? 0 > 0) || (count?.categoriesUpdated ?? 0 > 0)) {
+            throw new MethodNotAllowedError('Existem categorias cadastradas vinculadas a esse usuário');
+        }
+
+        if ((count?.peopleCreated ?? 0 > 0) || (count?.peopleUpdated ?? 0 > 0)) {
+            throw new MethodNotAllowedError('Existem pessoas cadastradas vinculadas a esse usuário');
+        }
+
         //TODO - fazer verificações para saber se o usuário pode ser excluído
 
         const { password, ...user } = await this.repository.delete(id);

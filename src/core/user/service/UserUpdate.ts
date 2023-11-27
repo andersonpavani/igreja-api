@@ -1,6 +1,6 @@
 import UseCase from "../../shared/UseCase";
 import UserRepository from "./UserRepository";
-import { ForbiddenError, NotFoundError } from "../../shared/ErrorHelpers";
+import { BadRequestError, ForbiddenError, NotFoundError } from "../../shared/ErrorHelpers";
 import User, { UserType } from "../model/UserModel";
 
 type Input = {
@@ -33,7 +33,23 @@ export default class UserUpdate implements UseCase<Input, Partial<User>> {
             throw new NotFoundError('Usuário não encontrado');
         }
 
-        const { password, ...user } = await this.repository.update(id === undefined ? { id: payloadUserId, email, name } : { id, email, name, type, enable });
+        if (email && email !== userExists.email) {
+            const userEmailAlreadyUsed = await this.repository.findByEmail(email);
+
+            if (userEmailAlreadyUsed) {
+                throw new BadRequestError('E-mail já utilizado em outro usuário');
+            }
+        }
+
+        if (name && name !== userExists.name) {
+            const userNameAlreadyUsed = await this.repository.findByEmail(name);
+
+            if (userNameAlreadyUsed) {
+                throw new BadRequestError('Nome já utilizado em outro usuário');
+            }
+        }
+
+        const { password: _, ...user } = await this.repository.update(id === undefined ? { id: payloadUserId, email, name } : { id, email, name, type, enable });
 
         return user;
     }

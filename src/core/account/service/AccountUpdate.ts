@@ -27,7 +27,15 @@ export default class AccountUpdate implements UseCase<Input, Account> {
             throw new NotFoundError('Conta não encontrada');
         }
 
-        if (account.enable === true && enable === false) {
+        if (name && account.name !== name) {
+            const accountToNameVerify = await this.repository.findByName(name);
+
+            if (accountToNameVerify) {
+                throw new BadRequestError('Nome já cadastrado para outra conta');
+            }
+        }
+
+        if (enable !== undefined && account.enable === true && enable === false) {
             //TODO - Só pode desativar se estiver com saldo 0
             //TODO - Só pode desativar se não houver movimentação em data superior a data de encerramento
 

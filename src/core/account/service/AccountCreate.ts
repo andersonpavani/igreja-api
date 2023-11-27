@@ -26,14 +26,18 @@ export default class AccountCreate implements UseCase<Input, Account> {
             throw new BadRequestError('O campo Tipo é obrigatório');
         }
 
-        const { name, type, openingBalance, openingDate, userId } = data;
+        if (data.openingBalance === undefined) {
+            throw new BadRequestError('O campo Saldo Inicial é obrigatório');
+        }
 
-        const accountExists = await this.repository.findByName(name);
+        const accountExists = await this.repository.findByName(data.name);
 
         if (accountExists) {
             throw new BadRequestError('Nome já utilizado');
         }
 
-        return this.repository.create({ name, type, openingBalance, openingDate }, userId);
+        const { userId, ...account } = data;
+
+        return this.repository.create(account, userId);
     }
 }

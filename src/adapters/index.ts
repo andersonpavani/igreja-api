@@ -28,6 +28,10 @@ import UserDelete from '../core/user/service/UserDelete';
 import UserDeleteController from './user/UserDeleteController';
 import UserFindByPartialNameEmail from '../core/user/service/UserFindByPartialNameEmail';
 import UserFindByPartialNameEmailController from './user/UserFindByPartialNameEmailController';
+import AccountUpdate from '../core/account/service/AccountUpdate';
+import AccountUpdateController from './account/AccountUpdateController';
+import AccountDelete from '../core/account/service/AccountDelete';
+import AccountDeleteController from './account/AccountDeleteController';
 
 export default class Adapters {
     //TODO - Create abstraction of server api
@@ -60,6 +64,12 @@ export default class Adapters {
 
         const accountFindById = new AccountFindById(accountRepository);
         new AccountFindByIdController(this.server, accountFindById)
+
+        const accountUpdate = new AccountUpdate(accountRepository);
+        new AccountUpdateController(this.server, accountUpdate);
+
+        const accountDelete = new AccountDelete(accountRepository);
+        new AccountDeleteController(this.server, accountDelete);
 
 
         //Middleware de autenticação de usuário ADMINISTRADOR logado
